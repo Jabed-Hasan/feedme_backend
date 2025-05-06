@@ -6,6 +6,7 @@ import { userRoutes } from '../modules/user/user.route';
 import { upload } from '../utils/sendImageCloudinary';
 import { sendImageToCloudinary } from '../utils/sendImageCloudinary';
 import { cartRoutes } from '../modules/cart';
+import { newsletterRoutes } from '../modules/newsletter/newsletter.route';
 
 const router = Router();
 
@@ -124,6 +125,10 @@ const modelRouters = [
   {
     path: '/cart',
     route: cartRoutes,
+  },
+  {
+    path: '/newsletter',
+    route: newsletterRoutes,
   },
 ];
 
