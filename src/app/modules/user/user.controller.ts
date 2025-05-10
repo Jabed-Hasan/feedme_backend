@@ -6,6 +6,9 @@ import { userService } from './user.service';
 import httpStatus from 'http-status';
 import bcrypt from 'bcrypt';
 import { UserModel } from './user.model';
+import { MealMenuModel } from '../mealMenu/mealMenu.model';
+import { OrderModel } from '../order/order.model';
+import mongoose from 'mongoose';
 
 // 2. Get All user
 const getUsers = catchAsync(
@@ -327,6 +330,83 @@ const deleteUser = catchAsync(
   },
 );
 
+// Provider Dashboard Stats
+export const getProviderDashboardStats = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const providerId = req.user?._id;
+    if (!providerId) {
+      return sendResponse(res, {
+        statusCode: httpStatus.BAD_REQUEST,
+        status: false,
+        message: 'Provider ID not found in user context.',
+        data: null,
+      });
+    }
+
+    // Total Meals
+    const totalMeals = await MealMenuModel.countDocuments({ providerId });
+    // Active Meals
+    const activeMeals = await MealMenuModel.countDocuments({ providerId, isAvailable: true });
+
+    // Get all meal IDs for this provider
+    const mealIds = await MealMenuModel.find({ providerId }).select('_id');
+    const mealIdList = mealIds.map(m => m._id);
+
+    // Total Orders (orders containing any of the provider's meals)
+    const totalOrders = await OrderModel.countDocuments({ 'meals.mealId': { $in: mealIdList } });
+
+    // Total Revenue (sum of subtotal for provider's meals in all orders)
+    const orders = await OrderModel.find({ 'meals.mealId': { $in: mealIdList } });
+    let totalRevenue = 0;
+    orders.forEach(order => {
+      order.meals.forEach(meal => {
+        if (mealIdList.some(id => id.equals(meal.mealId))) {
+          totalRevenue += meal.subtotal || 0;
+        }
+      });
+    });
+
+    // Average Rating (across all provider's meals)
+    const meals = await MealMenuModel.find({ providerId });
+    let totalRating = 0;
+    let ratingCount = 0;
+    let mealsWithRatings = 0;
+    const totalMealsCount = meals.length;
+
+    meals.forEach(meal => {
+      if (meal.ratings && meal.ratings.reviews && meal.ratings.reviews.length > 0) {
+        mealsWithRatings++;
+        meal.ratings.reviews.forEach((r: { rating: number }) => {
+          totalRating += r.rating;
+          ratingCount++;
+        });
+      }
+    });
+
+    const averageRating = ratingCount > 0 ? (totalRating / ratingCount).toFixed(2) : null;
+    const ratingStats = {
+      averageRating,
+      totalRatings: ratingCount,
+      mealsWithRatings,
+      totalMeals: totalMealsCount,
+      ratingPercentage: totalMealsCount > 0 ? ((mealsWithRatings / totalMealsCount) * 100).toFixed(2) : '0'
+    };
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      status: true,
+      message: 'Provider dashboard stats retrieved successfully',
+      data: {
+        totalMeals,
+        activeMeals,
+        totalOrders,
+        totalRevenue,
+        ratingStats
+      },
+    });
+  }
+);
+
 export const userController = {
   getUsers,
   getSingleUsers,
@@ -334,4 +414,5 @@ export const userController = {
   changePassword,
   adminUpdateUser,
   deleteUser,
+  getProviderDashboardStats,
 };

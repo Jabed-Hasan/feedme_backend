@@ -35,4 +35,7 @@ router.patch(
 // 6. Delete a user (admin only)
 router.delete('/:id', auth(USER_ROLE.admin), userController.deleteUser);
 
+// Provider Dashboard Stats
+router.get('/provider/dashboard-stats', auth(USER_ROLE.provider), userController.getProviderDashboardStats);
+
 export const userRoutes = router;

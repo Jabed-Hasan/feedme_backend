@@ -1079,6 +1079,21 @@ const createOrderFromCart = async (
   };
 };
 
+// Get customer dashboard stats
+const getCustomerDashboardStats = async (userId: string) => {
+  // Aggregate orders for this user, sorted by most recent first
+  const orders = await OrderModel.find({ user: userId }).sort({ createdAt: -1 });
+  const totalOrders = orders.length;
+  const totalSpent = orders.reduce((sum, order) => sum + (order.totalPrice || 0), 0);
+  // Get the most recent order's date
+  const lastOrderDate = orders.length > 0 ? orders[0].createdAt : null;
+  return {
+    totalOrders,
+    totalSpent,
+    lastOrderDate,
+  };
+};
+
 // Export the tracking services
 export const orderService = {
   createOrder,
@@ -1096,4 +1111,5 @@ export const orderService = {
   deleteOrder,
   getProviderOrders,
   sendProviderOrderNotifications,
+  getCustomerDashboardStats,
 };

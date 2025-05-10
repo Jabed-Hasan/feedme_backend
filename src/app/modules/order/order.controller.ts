@@ -343,6 +343,25 @@ const sendProviderNotifications = catchAsync(async (req: Request, res: Response)
   });
 });
 
+const getCustomerDashboardStats = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?._id;
+  if (!userId) {
+    return sendResponse(res, {
+      statusCode: httpStatus.BAD_REQUEST,
+      status: false,
+      message: 'User ID not found in request context.',
+      data: null,
+    });
+  }
+  const stats = await orderService.getCustomerDashboardStats(userId);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    status: true,
+    message: 'Customer dashboard stats retrieved successfully',
+    data: stats,
+  });
+});
+
 export const orderController = {
   createOrder,
   createOrderFromCart,
@@ -361,5 +380,6 @@ export const orderController = {
   getDetails,
   sendTestEmail,
   sendOrderEmail,
-  sendProviderNotifications
+  sendProviderNotifications,
+  getCustomerDashboardStats
 };
