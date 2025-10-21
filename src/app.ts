@@ -21,7 +21,7 @@ app.use(cookieParser());
 // Configure CORS
 app.use(
   cors({
-    origin: ['http://localhost:3000','http://localhost:3001'], // Your frontend URL
+    origin: ['https://feedme-beta.vercel.app', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:5001'], // Your frontend URL
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
@@ -42,7 +42,7 @@ app.use('/api', router);
 // Basic health check
 app.get('/', (req: Request, res: Response) => {
   console.log('Server is running and receiving requests');
-  res.send('Server is running 💨🏃‍♀️');
+  res.send('Server is running broo💨🏃‍♀️');
 });
 
 // Global error handler
