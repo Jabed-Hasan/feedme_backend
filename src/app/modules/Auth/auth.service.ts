@@ -15,7 +15,9 @@ const register = async (payload: TUser) => {
 };
 
 const login = async (payload: ILogInUser) => {
-  const user = await UserModel.findOne({ email: payload?.email });
+  const user = await UserModel.findOne({ 
+    email: payload?.email?.toLowerCase().trim() 
+  });
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found.');
   }
@@ -131,7 +133,9 @@ const forgotPassword = async (payload: IForgotPasswordRequest) => {
   console.log('Forgot password request for email:', payload.email);
   
   // Find the user by email
-  const user = await UserModel.findOne({ email: payload.email });
+  const user = await UserModel.findOne({ 
+    email: payload.email?.toLowerCase().trim() 
+  });
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, 'User not found with this email');
   }

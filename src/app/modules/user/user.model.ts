@@ -10,7 +10,13 @@ const UserSchema = new Schema<TUser>(
     name: { type: String, required: true },
     // city: { type: String, required: true },
     // address: { type: String, required: true, default: "Dhaka,Bangladesh" },
-    email: { type: String, required: true, unique: true },
+    email: { 
+      type: String, 
+      required: true, 
+      unique: true,
+      lowercase: true,
+      trim: true
+    },
     phone: { type: String, required: true, unique: true },
     address: { type: String, required: true },
     password: { type: String, required: true },
